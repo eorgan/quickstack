@@ -1,6 +1,6 @@
 services:
   redis:
-    image: redis:7
+    image: redis:latest
     networks:
       - network_public
     ports:
@@ -17,7 +17,7 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: 128M
+          memory: 512M
 networks:
   network_public:
     external: true

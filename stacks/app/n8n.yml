@@ -3,7 +3,7 @@ x-n8n-common: &n8n-common
   networks:
     - network_public
   environment: &n8n-env
-    - N8N_ENCRYPTION_KEY=secret
+    - N8N_ENCRYPTION_KEY=FIMYIsCjSGTaFNVMa5fIufM6UeGJkw9AoP
     - NODE_ENV=production
 
     - N8N_METRICS=true
@@ -17,14 +17,14 @@ x-n8n-common: &n8n-common
     - DB_POSTGRESDB_DATABASE=n8n
     - DB_POSTGRESDB_HOST=postgres
     - DB_POSTGRESDB_PORT=5432
-    - DB_POSTGRESDB_USER=n8n
-    - DB_POSTGRESDB_PASSWORD=secret
+    - DB_POSTGRESDB_USER=postgres
+    - DB_POSTGRESDB_PASSWORD=05iVzNxRwDZfOdJkrJfiJ2G9gXAzbK26Cj
 
     - N8N_PORT=5678
-    - N8N_HOST=editor.n8n.website.com
-    - N8N_EDITOR_BASE_URL=https://editor.n8n.website.com/
+    - N8N_HOST=n8n.mybrokeritajai.com.br/
+    - N8N_EDITOR_BASE_URL=https://n8n.mybrokeritajai.com.br/
     - N8N_PROTOCOL=https
-    - WEBHOOK_URL=https://webhooks.n8n.website.com/
+    - WEBHOOK_URL=https://webhooks.mybrokeritajai.com.br/
     - N8N_ENDPOINT_WEBHOOK=webhook
 
     - EXECUTIONS_MODE=queue
@@ -72,13 +72,13 @@ x-n8n-common: &n8n-common
     # - N8N_SMTP_SSL=true
 
     # Sendgrid
-    - N8N_EMAIL_MODE=smtp
-    - N8N_SMTP_HOST=smtp.sendgrid.net
-    - N8N_SMTP_PORT=587
-    - N8N_SMTP_USER=user
-    - N8N_SMTP_PASS=secret
-    - N8N_SMTP_SENDER=no-reply@website.com
-    - N8N_SMTP_SSL=true
+    # - N8N_EMAIL_MODE=smtp
+    # - N8N_SMTP_HOST=smtp.sendgrid.net
+    # - N8N_SMTP_PORT=587
+    # - N8N_SMTP_USER=user
+    # - N8N_SMTP_PASS=secret
+    # - N8N_SMTP_SENDER=no-reply@mybrokeritajai.com.br
+    # - N8N_SMTP_SSL=true
   deploy: &n8n-deploy
     mode: replicated
     replicas: 1
@@ -88,7 +88,7 @@ x-n8n-common: &n8n-common
     resources:
       limits:
         cpus: "1"
-        memory: 768M
+        memory: 1024M
     update_config:
       parallelism: 1
       delay: 30s
@@ -105,9 +105,10 @@ services:
       <<: *n8n-deploy
       labels:
         - traefik.enable=true
-        - traefik.http.routers.n8n_editor.rule=Host(`editor.n8n.website.com`)
+        - traefik.http.routers.n8n_editor.rule=Host(`n8n.mybrokeritajai.com.br`)
         - traefik.http.routers.n8n_editor.entrypoints=websecure
         - traefik.http.routers.n8n_editor.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.n8n_editor.priority=2
         - traefik.http.routers.n8n_editor.service=n8n_editor
         - traefik.http.services.n8n_editor.loadbalancer.server.port=5678
         - traefik.http.services.n8n_editor.loadbalancer.passHostHeader=true
@@ -119,9 +120,10 @@ services:
       <<: *n8n-deploy
       labels:
         - traefik.enable=true
-        - traefik.http.routers.n8n_webhook.rule=Host(`webhooks.n8n.website.com`)
+        - traefik.http.routers.n8n_webhook.rule=Host(`webhooks.mybrokeritajai.com.br`)
         - traefik.http.routers.n8n_webhook.entrypoints=websecure
         - traefik.http.routers.n8n_webhook.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.n8n_webhook.priority=2
         - traefik.http.routers.n8n_webhook.service=n8n_webhook
         - traefik.http.services.n8n_webhook.loadbalancer.server.port=5678
         - traefik.http.services.n8n_webhook.loadbalancer.passHostHeader=true

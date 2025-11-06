@@ -14,7 +14,7 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencryptresolver.acme.email=example@example.com"
+      - "--certificatesresolvers.letsencryptresolver.acme.email=eliezer@mybrokeritajai.com.br"
       - "--certificatesresolvers.letsencryptresolver.acme.storage=/etc/traefik/letsencrypt/acme.json"
       - "--log.level=DEBUG"
       - "--log.format=common"

@@ -16,11 +16,11 @@ x-chatwoot-common: &chatwoot-common
     - RACK_TIMEOUT_SERVICE_TIMEOUT=600
 
     # Security Configuration
-    - SECRET_KEY_BASE=secret
+    - SECRET_KEY_BASE=SRJ0hkmpmtxItFHNvUjBkPsXaXzS95AnSy
     - FORCE_SSL=true
 
     # Frontend Configuration
-    - FRONTEND_URL=https://chatwoot.website.com
+    - FRONTEND_URL=https://chatwoot.mybrokeritajai.com.br
 
     # Localization
     - DEFAULT_LOCALE=en
@@ -32,38 +32,38 @@ x-chatwoot-common: &chatwoot-common
     - POSTGRES_HOST=postgres
     - POSTGRES_DATABASE=chatwoot
     - POSTGRES_USERNAME=postgres
-    - POSTGRES_PASSWORD=secret
+    - POSTGRES_PASSWORD=05iVzNxRwDZfOdJkrJfiJ2G9gXAzbK26Cj
 
     # Redis Configuration
-    - REDIS_URL=redis://redis:6379
+    - REDIS_URL=redis://redis:6379/3
 
     # Storage Configuration (AWS S3)
-    - ACTIVE_STORAGE_SERVICE=amazon
-    - AWS_REGION=us-east-1
-    - AWS_ACCESS_KEY_ID=your-access-key-id
-    - AWS_SECRET_ACCESS_KEY=your-secret-access-key
-    - S3_BUCKET_NAME=chatwoot-uploads
+    # - ACTIVE_STORAGE_SERVICE=amazon
+    # - AWS_REGION=us-east-1
+    # - AWS_ACCESS_KEY_ID=your-access-key-id
+    # - AWS_SECRET_ACCESS_KEY=your-secret-access-key
+    # - S3_BUCKET_NAME=chatwoot-uploads
 
     # Email configuration
-    - MAILER_SENDER_EMAIL=Support <help@website.com>
+    - MAILER_SENDER_EMAIL=Support <eliezer@mybrokeritajai.com.br>
 
     # AWS SES
-    - SMTP_ADDRESS=email-smtp.us-east-1.amazonaws.com
-    - SMTP_AUTHENTICATION=plain
-    - SMTP_DOMAIN=website.com
-    - SMTP_ENABLE_STARTTLS_AUTO=true
-    - SMTP_PORT=587
-    - SMTP_USERNAME=apikey
-    - SMTP_PASSWORD=your-secret-access-key
+    # - SMTP_ADDRESS=email-smtp.us-east-1.amazonaws.com
+    # - SMTP_AUTHENTICATION=plain
+    # - SMTP_DOMAIN=organ.dev.br
+    # - SMTP_ENABLE_STARTTLS_AUTO=true
+    # - SMTP_PORT=587
+    # - SMTP_USERNAME=apikey
+    # - SMTP_PASSWORD=your-secret-access-key
 
     # Sendgrid
-    - SMTP_ADDRESS=smtp.sendgrid.net
-    - SMTP_AUTHENTICATION=plain
-    - SMTP_DOMAIN=website.com
-    - SMTP_ENABLE_STARTTLS_AUTO=true
-    - SMTP_PORT=587
-    - SMTP_USERNAME=apikey
-    - SMTP_PASSWORD=your-sendgrid-api-key
+    # - SMTP_ADDRESS=smtp.sendgrid.net
+    # - SMTP_AUTHENTICATION=plain
+    # - SMTP_DOMAIN=organ.dev.br
+    # - SMTP_ENABLE_STARTTLS_AUTO=true
+    # - SMTP_PORT=587
+    # - SMTP_USERNAME=apikey
+    # - SMTP_PASSWORD=your-sendgrid-api-key
 
     # Bot Configuration
     - USE_INBOX_AVATAR_FOR_BOT=true
@@ -119,14 +119,14 @@ services:
     command: bundle exec rails db:chatwoot_prepare
     deploy:
       mode: replicated
-      replicas: 0  # Set to 1 to run initialization, then scale back to 0
+      replicas: 1  # Set to 1 to run initialization, then scale back to 0
       placement:
         constraints:
           - node.role == manager
       resources:
         limits:
-          cpus: "0.5"
-          memory: 512M
+          cpus: "1"
+          memory: 1024M
         reservations:
           cpus: "0.25"
           memory: 256M
@@ -150,9 +150,10 @@ services:
       labels:
         # Traefik Configuration
         - traefik.enable=true
-        - traefik.http.routers.chatwoot_web.rule=Host(`chatwoot.example.com`)
+        - traefik.http.routers.chatwoot_web.rule=Host(`chatwoot.mybrokeritajai.com.br`)
         - traefik.http.routers.chatwoot_web.entrypoints=websecure
         - traefik.http.routers.chatwoot_web.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.chatwoot_web.priority=2
         - traefik.http.routers.chatwoot_web.service=chatwoot_web
         - traefik.http.services.chatwoot_web.loadbalancer.server.port=3000
         - traefik.http.services.chatwoot_web.loadbalancer.passhostheader=true
@@ -168,8 +169,8 @@ services:
       <<: *chatwoot-deploy
       resources:
         limits:
-          cpus: "0.5"
-          memory: 768M
+          cpus: "1"
+          memory: 1024M
         reservations:
           cpus: "0.25"
           memory: 256M
