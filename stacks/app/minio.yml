@@ -1,0 +1,58 @@
+services:
+  minio:
+    image: minio/minio
+    command: server --console-address ":9001" /data
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: 5UhgE5o63wW7z4rSkeXyjmECZP1LL95lf1qOFsJ5wHZ8W1abkE
+    volumes:
+      - minio_data:/data
+    networks:
+      - network_public
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.minio.rule=Host(`minio.organ.dev.br`)
+        - traefik.http.routers.minio.entrypoints=websecure
+        - traefik.http.routers.minio.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.minio.service=minio
+        - traefik.http.services.minio.loadbalancer.server.port=9000
+        - traefik.http.routers.minio-console.rule=Host(`console.minio.organ.dev.br`)
+        - traefik.http.routers.minio-console.entrypoints=websecure
+        - traefik.http.routers.minio-console.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.minio-console.service=minio-console
+        - traefik.http.services.minio-console.loadbalancer.server.port=9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio-createbucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    networks:
+      - network_public
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set minio http://minio:9000 minio 5UhgE5o63wW7z4rSkeXyjmECZP1LL95lf1qOFsJ5wHZ8W1abkE;
+      /usr/bin/mc mb minio/evolution-uploads;
+      /usr/bin/mc anonymous set public minio/evolution-uploads;
+      exit 0;
+      "
+
+volumes:
+  minio_data:
+    external: true
+    name: minio_data
+
+networks:
+  network_public:
+    external: true
+    name: network_public

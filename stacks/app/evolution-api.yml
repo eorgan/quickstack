@@ -7,8 +7,9 @@ services:
     volumes:
       - evolution_instances:/evolution/instances
       - evolution_store:/evolution/store
+      - evolution_media:/evolution/media
     environment:
-      - SERVER_URL=https://evo.mybrokeritajai.com.br
+      - SERVER_URL=https://api.evo.organ.dev.br
       - SERVER_PORT=8080
       - DOCKER_ENV=true
 
@@ -22,6 +23,14 @@ services:
       - STORE_CONTACTS=true
       - STORE_CHATS=true
 
+      #- S3_ENABLED=true
+      #- S3_ACCESS_KEY=minio
+      #- S3_SECRET_KEY=5UhgE5o63wW7z4rSkeXyjmECZP1LL95lf1qOFsJ5wHZ8W1abkE
+      #- S3_BUCKET=evolution-uploads
+      #- S3_PORT=9000
+      #- S3_ENDPOINT=minio
+      #- S3_USE_SSL=false
+
       - CLEAN_STORE_CLEANING_INTERVAL=7200 # seconds === 2h
       - CLEAN_STORE_MESSAGES=true
       - CLEAN_STORE_MESSAGE_UP=true
@@ -29,7 +38,7 @@ services:
       - CLEAN_STORE_CHATS=true
 
       - AUTHENTICATION_TYPE=apikey
-      - AUTHENTICATION_API_KEY=CiTXsHGngua7u4lj8JVIl1lH5T4t3CDmrG
+      - AUTHENTICATION_API_KEY=5rO8zDgzA9fd6e72OLmV1g8Rr1iXXqzmyJB0gJ5Z6S9eZ5amEt
       - AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES=true
 
       - QRCODE_LIMIT=30
@@ -40,7 +49,7 @@ services:
 
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
-      - DATABASE_CONNECTION_URI=postgresql://postgres:05iVzNxRwDZfOdJkrJfiJ2G9gXAzbK26Cj@postgres:5432/evolution?schema=public
+      - DATABASE_CONNECTION_URI=postgresql://postgres:QT0xUTHY5NkfQFm3eqlKYnpbFTE5tEy7vbKGuUAyIyxrTZQoNe@postgres:5432/evolution?schema=public
       - DATABASE_SAVE_DATA_INSTANCE=true
       - DATABASE_SAVE_DATA_NEW_MESSAGE=true
       - DATABASE_SAVE_MESSAGE_UPDATE=true
@@ -61,7 +70,7 @@ services:
           memory: 256M
       labels:
         - traefik.enable=true
-        - traefik.http.routers.evolution.rule=Host(`evo.mybrokeritajai.com.br`)
+        - traefik.http.routers.evolution.rule=Host(`api.evo.organ.dev.br`)
         - traefik.http.routers.evolution.entrypoints=websecure
         - traefik.http.routers.evolution.tls.certresolver=letsencryptresolver
         - traefik.http.routers.evolution.priority=2
@@ -75,6 +84,9 @@ volumes:
   evolution_store:
     external: true
     name: evolution_store
+  evolution_media:
+    external: true
+    name: evolution_media
 networks:
   network_public:
     name: network_public

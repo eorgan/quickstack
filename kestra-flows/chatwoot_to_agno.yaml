@@ -1,0 +1,53 @@
+id: chatwoot_process_message
+namespace: dev.organ.automation
+description: Processa mensagens do Chatwoot usando o agente Agno (Maya)
+
+inputs:
+  - id: payload
+    type: JSON
+    description: Payload do Webhook do Chatwoot
+
+tasks:
+  - id: log_message
+    type: io.kestra.plugin.core.log.Log
+    message: "Recebido evento: {{ inputs.payload.event }} de {{ inputs.payload.sender.id }}"
+
+  - id: check_event_type
+    type: io.kestra.plugin.core.flow.Switch
+    value: "{{ inputs.payload.event }}"
+    cases:
+      message_created:
+        - id: check_message_type
+          type: io.kestra.plugin.core.flow.Switch
+          value: "{{ inputs.payload.message_type }}"
+          cases:
+            incoming: 
+              - id: call_agno_agent
+                type: io.kestra.plugin.core.http.Request
+                uri: "http://agno:8000/api/chat"
+                method: POST
+                contentType: application/json
+                body: |
+                  {
+                    "message": "{{ inputs.payload.content }}",
+                    "user_id": "{{ inputs.payload.sender.id }}",
+                    "session_id": "{{ inputs.payload.conversation.id }}"
+                  }
+                
+              - id: send_reply_to_chatwoot
+                type: io.kestra.plugin.core.http.Request
+                uri: "http://chatwoot_web:3000/api/v1/accounts/{{ inputs.payload.account.id }}/conversations/{{ inputs.payload.conversation.id }}/messages"
+                method: POST
+                contentType: application/json
+                headers:
+                  api_access_token: "{{ secret('CHATWOOT_API_TOKEN') }}"
+                body: |
+                  {
+                    "content": "{{ outputs.call_agno_agent.body.response }}",
+                    "message_type": "outgoing"
+                  }
+
+errors:
+  - id: error_handler
+    type: io.kestra.plugin.core.log.Log
+    message: "Erro no processamento: {{ task.id }} - {{ taskrun.value }}"

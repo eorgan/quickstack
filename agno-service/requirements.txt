@@ -1,0 +1,15 @@
+agno[postgres]
+psycopg2-binary
+sqlalchemy
+fastapi
+uvicorn
+pydantic
+google-generativeai
+anthropic
+psycopg2-binary
+pgvector
+python-dotenv
+requests
+elevenlabs
+groq
+google-genai

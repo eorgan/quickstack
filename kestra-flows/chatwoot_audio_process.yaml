@@ -1,0 +1,96 @@
+id: chatwoot_audio_process
+namespace: dev.organ.automation
+description: Fluxo avançado Chatwoot <-> Agno com suporte a Áudio (Whisper + ElevenLabs)
+
+inputs:
+  - id: payload
+    type: JSON
+    description: Payload Webhook Chatwoot
+
+tasks:
+  - id: log_event
+    type: io.kestra.plugin.core.log.Log
+    message: "Evento recebido: {{ inputs.payload.event }}"
+
+  - id: check_message_type
+    type: io.kestra.plugin.core.flow.Switch
+    value: "{{ inputs.payload.message_type }}"
+    cases:
+      incoming:
+        - id: check_attachments
+          type: io.kestra.plugin.core.flow.If
+          condition: "{{ inputs.payload.attachments | length > 0 }}"
+          then:
+            # --- FLUXO DE ÁUDIO ---
+            - id: log_audio
+              type: io.kestra.plugin.core.log.Log
+              message: "Áudio detectado! Iniciando transcrição..."
+
+            - id: transcribe_audio
+              type: io.kestra.plugin.core.http.Request
+              uri: "http://agno_agno:8000/api/transcribe"
+              method: POST
+              contentType: application/json
+              body: |
+                {
+                  "audio_url": "{{ inputs.payload.attachments[0].data_url }}"
+                }
+
+            - id: call_agent_audio
+              type: io.kestra.plugin.core.http.Request
+              uri: "http://agno_agno:8000/api/chat"
+              method: POST
+              contentType: application/json
+              body: |
+                {
+                  "message": "{{ outputs.transcribe_audio.body.text }}",
+                  "user_id": "{{ inputs.payload.sender.id }}",
+                  "session_id": "{{ inputs.payload.conversation.id }}",
+                  "is_audio": true
+                }
+
+            - id: send_audio_reply
+              type: io.kestra.plugin.core.http.Request
+              uri: "http://agno_agno:8000/api/send_audio_reply"
+              method: POST
+              contentType: application/json
+              body: |
+                {
+                  "text": "{{ outputs.call_agent_audio.body.response }}",
+                  "account_id": "{{ inputs.payload.account.id }}",
+                  "conversation_id": "{{ inputs.payload.conversation.id }}",
+                  "token": "{{ secret('CHATWOOT_API_TOKEN') }}"
+                }
+
+          else:
+            # --- FLUXO DE TEXTO ---
+            - id: call_agent_text
+              type: io.kestra.plugin.core.http.Request
+              uri: "http://agno_agno:8000/api/chat"
+              method: POST
+              contentType: application/json
+              body: |
+                {
+                  "message": "{{ inputs.payload.content }}",
+                  "user_id": "{{ inputs.payload.sender.id }}",
+                  "session_id": "{{ inputs.payload.conversation.id }}",
+                  "is_audio": false
+                }
+
+            - id: reply_text
+              type: io.kestra.plugin.core.http.Request
+              uri: "http://chatwoot_chatwoot_web:3000/api/v1/accounts/{{ inputs.payload.account.id }}/conversations/{{ inputs.payload.conversation.id }}/messages"
+              method: POST
+              headers:
+                api_access_token: "{{ secret('CHATWOOT_API_TOKEN') }}"
+              contentType: application/json
+              body: |
+                {
+                  "content": "{{ outputs.call_agent_text.body.response }}",
+                  "message_type": "outgoing"
+                }
+
+errors:
+  - id: error_handler
+    type: io.kestra.plugin.core.log.Log
+    message: "Erro no fluxo: {{ task.id }} - {{ taskrun.value }}"

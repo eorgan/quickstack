@@ -1,0 +1,55 @@
+services:
+  agno:
+    image: eorgan/agno-service:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.agno.rule=Host(`ai.organ.dev.br`)
+        - traefik.http.routers.agno.entrypoints=websecure
+        - traefik.http.routers.agno.tls.certresolver=letsencryptresolver
+        - traefik.http.services.agno.loadbalancer.server.port=8000
+    environment:
+      - GOOGLE_API_KEY=AIzaSyAY0vFY8wr8Ogm1lfjGw71cgmfR0R4RgwM
+      - MOONSHOT_API_KEY=
+      - ANTHROPIC_API_KEY=
+      - ELEVENLABS_API_KEY=6cad5075bc3089d79c7a4b2efc05e4c595764965dcad11818bac168814f5102d
+      - GROQ_API_KEY=
+      - DATABASE_URL=postgresql://postgres:QT0xUTHY5NkfQFm3eqlKYnpbFTE5tEy7vbKGuUAyIyxrTZQoNe@postgres:5432/agno
+    volumes:
+      - agno_code:/app/app # Mapeia apenas a pasta app para permitir edicao
+    networks:
+      - network_public
+
+  editor:
+    image: lscr.io/linuxserver/code-server:latest
+    environment:
+      - PUID=0 # Root para poder editar arquivos do outro container
+      - PGID=0
+      - TZ=America/Sao_Paulo
+      - PASSWORD=5UhgE5o63wW7z4rSkeXyjmECZP1LL95lf1qOFsJ5wHZ8W1abkE # Senha para acessar o editor
+    volumes:
+      - agno_code:/config/workspace/app # Edita os mesmos arquivos
+    networks:
+      - network_public
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.editor.rule=Host(`code.organ.dev.br`)
+        - traefik.http.routers.editor.entrypoints=websecure
+        - traefik.http.routers.editor.tls.certresolver=letsencryptresolver
+        - traefik.http.services.editor.loadbalancer.server.port=8443
+
+volumes:
+  agno_code:
+    external: true
+    name: agno_code
+
+networks:
+  network_public:
+    external: true
+    name: network_public

@@ -1,0 +1,19 @@
+docker swarm init --advertise-addr="89.167.52.117"
+docker network create --driver=overlay network_public
+
+docker exec -it c1614a5290e7 createdb -U postgres kestra
+
+PostGres
+QT0xUTHY5NkfQFm3eqlKYnpbFTE5tEy7vbKGuUAyIyxrTZQoNe
+
+Evolution
+5rO8zDgzA9fd6e72OLmV1g8Rr1iXXqzmyJB0gJ5Z6S9eZ5amEt
+
+ChatWoot
+gNfqT1po4B06NCdp7utBTaGgZ3wIEJlWkSLwOJaBZNTa99tQgt
+
+Minio e agno
+5UhgE5o63wW7z4rSkeXyjmECZP1LL95lf1qOFsJ5wHZ8W1abkE
+
+docker build -t eorgan/agno-service:latest ./quickstack/agno-service
+docker push eorgan/agno-service:latest
