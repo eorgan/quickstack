@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:15
+    image: pgvector/pgvector:pg17
     networks:
       - network_public
     entrypoint: docker-entrypoint.sh
@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=secret
+      - POSTGRES_PASSWORD=d335f8440b83d13f5114cd1a348e4ac3368820704cc8c420ed308ff4fc0316ec
       - POSTGRES_INITDB_ARGS="--auth-host=scram-sha-256"
     deploy:
       mode: replicated

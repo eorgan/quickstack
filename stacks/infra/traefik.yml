@@ -1,12 +1,11 @@
 services:
   traefik:
-    image: traefik:v2.11
+    image: traefik:v3.7.1
     command:
       - "--api.dashboard=true"
-      - "--providers.docker.swarmMode=true"
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=network_public"
+      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
+      - "--providers.swarm.exposedbydefault=false"
+      - "--providers.swarm.network=network_public"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
@@ -16,7 +15,7 @@ services:
       - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.letsencryptresolver.acme.email=example@example.com"
       - "--certificatesresolvers.letsencryptresolver.acme.storage=/etc/traefik/letsencrypt/acme.json"
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       - "--log.format=common"
       - "--log.filePath=/var/log/traefik/traefik.log"
       - "--accesslog=true"
@@ -29,7 +28,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
         - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
-        - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+        - "traefik.http.routers.http-catchall.rule=HostRegexp(`.+`)"
         - "traefik.http.routers.http-catchall.entrypoints=web"
         - "traefik.http.routers.http-catchall.middlewares=redirect-https@docker"
         - "traefik.http.routers.http-catchall.priority=1"
